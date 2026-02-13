@@ -1,28 +1,55 @@
 ---
 description: Query the Gerschel portal PostgreSQL database with read-only SQL. Use when analyzing case data, checking schema, retrieving records, or answering questions about data in the system.
-allowed-tools: mcp__gerschel-db__query_database,Bash(mkdir:*),Bash(md:*)
+allowed-tools: Bash(curl:*),Bash(curl.exe:*),Bash(cat:*),Bash(type:*),Bash(mkdir:*),Bash(md:*),Bash(New-Item:*)
 argument-hint: [question about the data or SQL query]
 ---
 
 # Chat with Database
 
-Run read-only SQL queries against the portal database using the `query_database` tool.
+Run read-only SQL queries against the portal database via the API.
 
 ## First-time Setup
 
 1. Go to **https://portal.gerschellaw.com/tools/api-keys** and generate an API key.
 2. Copy the key (it's only shown once).
-3. Save it to a token file at `~/.gerschel/db-api-token`.
+3. Save it to a token file:
 
-If the user pastes a key starting with `glk_`, save it to the file for them using Bash.
+**Windows (PowerShell):**
+```powershell
+mkdir -Force "$env:USERPROFILE\.gerschel" | Out-Null
+Set-Content -Path "$env:USERPROFILE\.gerschel\db-api-token" -Value "glk_YOUR_KEY_HERE" -NoNewline
+```
+
+**macOS/Linux:**
+```bash
+mkdir -p ~/.gerschel
+echo -n "glk_YOUR_KEY_HERE" > ~/.gerschel/db-api-token
+```
+
+If the user pastes a key starting with `glk_`, save it to the file for them.
 
 ## Running Queries
 
-Use the `query_database` MCP tool directly with a SQL string:
+Read the token, then call the API. Always check the OS to use the right syntax.
 
+**Windows (PowerShell):**
+```powershell
+$token = Get-Content "$env:USERPROFILE\.gerschel\db-api-token"
+curl.exe -s -X POST https://portal.gerschellaw.com/api/sql-query -H "Content-Type: application/json" -H "Authorization: Bearer $token" -d '{\"query\": \"SELECT 1\"}'
 ```
-query_database({ query: "SELECT COUNT(*) FROM \"Case Info Database\"" })
+
+**macOS/Linux:**
+```bash
+TOKEN=$(cat ~/.gerschel/db-api-token)
+curl -s -X POST https://portal.gerschellaw.com/api/sql-query \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"query": "SELECT 1"}'
 ```
+
+**Important Windows notes:**
+- Use `curl.exe` (not `curl`, which is a PowerShell alias for `Invoke-WebRequest`)
+- JSON in `-d` must escape inner double quotes with backslashes: `'{\"key\": \"value\"}'`
 
 ## Response Format
 
@@ -36,15 +63,19 @@ Success:
 }
 ```
 
-Error (SQL issues) — use the details (especially `hint` and `position`) to fix and retry:
+Error (SQL issues):
 ```json
 {
-  "message": "column \"foo\" does not exist",
-  "detail": null,
-  "hint": "Perhaps you meant...",
-  "position": "8"
+  "data": {
+    "message": "column \"foo\" does not exist",
+    "detail": null,
+    "hint": "Perhaps you meant...",
+    "position": "8"
+  }
 }
 ```
+
+Use the error details (especially `hint` and `position`) to fix and retry the query.
 
 ## Schema Exploration
 
