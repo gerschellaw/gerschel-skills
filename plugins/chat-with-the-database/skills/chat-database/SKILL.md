@@ -103,6 +103,7 @@ SELECT tc.table_name, kcu.column_name, ccu.table_name AS foreign_table, ccu.colu
 - Format output nicely for the user. Summarize large result sets.
 - If a query errors, check table/column names (they often have spaces) and fix.
 - The API enforces a 30-second query timeout.
+- When presenting tabular data, use markdown tables for readability.
 
 ## Workflow
 
