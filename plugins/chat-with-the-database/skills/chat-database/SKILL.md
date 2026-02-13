@@ -12,46 +12,30 @@ Run read-only SQL queries against the portal database via the API.
 
 1. Go to **https://portal.gerschellaw.com/tools/api-keys** and generate an API key.
 2. Copy the key (it's only shown once).
-3. Save it to the persistent `.claude` config directory:
+3. Save it to the persistent config directory using `$CLAUDE_CONFIG_DIR`:
 
-**macOS/Linux:**
 ```bash
-mkdir -p ~/.claude/gerschel
-echo -n "glk_YOUR_KEY_HERE" > ~/.claude/gerschel/db-api-token
+mkdir -p "$CLAUDE_CONFIG_DIR/gerschel"
+echo -n "glk_YOUR_KEY_HERE" > "$CLAUDE_CONFIG_DIR/gerschel/db-api-token"
 ```
 
-**Windows (PowerShell):**
-```powershell
-mkdir -Force "$env:USERPROFILE\.claude\gerschel" | Out-Null
-Set-Content -Path "$env:USERPROFILE\.claude\gerschel\db-api-token" -Value "glk_YOUR_KEY_HERE" -NoNewline
-```
+**IMPORTANT:** Always use `$CLAUDE_CONFIG_DIR`, never `~/.claude`. In Cowork, `~` resolves to an ephemeral session directory that resets between sessions. `$CLAUDE_CONFIG_DIR` is a persistent bindfs mount that survives across sessions.
 
-The `~/.claude` directory persists across Cowork sessions, so the key only needs to be saved once.
+If the user pastes a key starting with `glk_`, save it to the file for them.
 
 If the user pastes a key starting with `glk_`, save it to the file for them.
 
 ## Running Queries
 
-Read the token from the persistent config directory, then call the API. Always check the OS to use the right syntax.
+Read the token from the persistent config directory, then call the API.
 
-**macOS/Linux:**
 ```bash
-TOKEN=$(cat ~/.claude/gerschel/db-api-token)
+TOKEN=$(cat "$CLAUDE_CONFIG_DIR/gerschel/db-api-token")
 curl -s -X POST https://portal.gerschellaw.com/api/sql-query \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d '{"query": "SELECT 1"}'
 ```
-
-**Windows (PowerShell):**
-```powershell
-$token = Get-Content "$env:USERPROFILE\.claude\gerschel\db-api-token"
-curl.exe -s -X POST https://portal.gerschellaw.com/api/sql-query -H "Content-Type: application/json" -H "Authorization: Bearer $token" -d '{\"query\": \"SELECT 1\"}'
-```
-
-**Important Windows notes:**
-- Use `curl.exe` (not `curl`, which is a PowerShell alias for `Invoke-WebRequest`)
-- JSON in `-d` must escape inner double quotes with backslashes: `'{\"key\": \"value\"}'`
 
 If the token file is missing, ask the user to paste their API key or generate one at https://portal.gerschellaw.com/tools/api-keys.
 
