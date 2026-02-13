@@ -1,8 +1,0 @@
-{
-  "name": "chat-database",
-  "description": "Chat with the portal PostgreSQL database using read-only SQL queries via psql",
-  "version": "1.0.0",
-  "author": {
-    "name": "Gerschel Law Firm"
-  }
-}

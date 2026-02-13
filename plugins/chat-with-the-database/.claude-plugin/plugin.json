@@ -1,0 +1,8 @@
+{
+  "name": "chat-with-the-database",
+  "description": "Chat with the Gerschel database",
+  "version": "1.0.0",
+  "author": {
+    "name": "Gerschel Law Firm"
+  }
+}

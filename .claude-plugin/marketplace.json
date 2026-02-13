@@ -8,9 +8,9 @@
   },
   "plugins": [
     {
-      "name": "chat-database",
-      "source": "./plugins/chat-database",
-      "description": "Chat with the portal PostgreSQL database using read-only SQL queries via psql"
+      "name": "chat-with-the-database",
+      "source": "./plugins/chat-with-the-database",
+      "description": "Chat with the Gerschel database"
     }
   ]
 }
