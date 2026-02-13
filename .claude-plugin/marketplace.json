@@ -1,0 +1,16 @@
+{
+  "name": "gerschel-skills",
+  "owner": {
+    "name": "Gerschel Law Firm"
+  },
+  "metadata": {
+    "description": "Claude Cowork skills for the Gerschel Law Firm portal"
+  },
+  "plugins": [
+    {
+      "name": "chat-database",
+      "source": "./plugins/chat-database",
+      "description": "Chat with the portal PostgreSQL database using read-only SQL queries via psql"
+    }
+  ]
+}
