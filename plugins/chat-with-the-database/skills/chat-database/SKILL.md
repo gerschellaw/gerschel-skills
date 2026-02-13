@@ -1,6 +1,6 @@
 ---
 description: Query the Gerschel portal PostgreSQL database with read-only SQL. Use when analyzing case data, checking schema, retrieving records, or answering questions about data in the system.
-allowed-tools: Bash(curl:*),Bash(curl.exe:*),Bash(cat:*),Bash(type:*),Bash(mkdir:*),Bash(md:*),Bash(New-Item:*)
+allowed-tools: Bash(curl:*),Bash(curl.exe:*)
 argument-hint: [question about the data or SQL query]
 ---
 
@@ -8,36 +8,26 @@ argument-hint: [question about the data or SQL query]
 
 Run read-only SQL queries against the portal database via the API.
 
-## First-time Setup
+## Authentication
 
-1. Go to **https://portal.gerschellaw.com/tools/api-keys** and generate an API key.
-2. Copy the key (it's only shown once).
-3. Save it to the persistent config directory using `$CLAUDE_CONFIG_DIR`:
+The API key should be provided via the user's Cowork custom instructions (Settings → Cowork → Instructions). The key will be available in your context at the start of each session.
 
-```bash
-mkdir -p "$CLAUDE_CONFIG_DIR/gerschel"
-echo -n "glk_YOUR_KEY_HERE" > "$CLAUDE_CONFIG_DIR/gerschel/db-api-token"
-```
+Look in your system context for a Gerschel API key starting with `glk_`. If you can't find one, ask the user to either:
+1. Paste their API key here (starts with `glk_`)
+2. Generate a new one at **https://portal.gerschellaw.com/tools/api-keys** and paste it
 
-**IMPORTANT:** Always use `$CLAUDE_CONFIG_DIR`, never `~/.claude`. In Cowork, `~` resolves to an ephemeral session directory that resets between sessions. `$CLAUDE_CONFIG_DIR` is a persistent bindfs mount that survives across sessions.
-
-If the user pastes a key starting with `glk_`, save it to the file for them.
-
-If the user pastes a key starting with `glk_`, save it to the file for them.
+To make the key persist across sessions, tell the user to add it to their Cowork custom instructions in Claude Desktop settings (Settings → Cowork → Instructions) like: `gerschel api key: glk_...`
 
 ## Running Queries
 
-Read the token from the persistent config directory, then call the API.
+Use the API key from context to call the API.
 
 ```bash
-TOKEN=$(cat "$CLAUDE_CONFIG_DIR/gerschel/db-api-token")
 curl -s -X POST https://portal.gerschellaw.com/api/sql-query \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $TOKEN" \
+  -H "Authorization: Bearer glk_THE_KEY_FROM_CONTEXT" \
   -d '{"query": "SELECT 1"}'
 ```
-
-If the token file is missing, ask the user to paste their API key or generate one at https://portal.gerschellaw.com/tools/api-keys.
 
 ## Response Format
 
