@@ -98,6 +98,7 @@ The Drive endpoint (`/api/skills/drive/student/:id`) accepts UCID or OSIS — **
 - **`"Case Info Database"`** — the main case table. Key columns: `"UCID"`, `"Case Number"`, `"Student First Name"`, `"Student Last Name"`, `"Parent Name"`, `"Case Type"`, `"School Year"`, `"Folder Link"`, `"IHO"`, `"Hearing Staff"`, `student_id`.
 - **`case_school_year`** — which school year(s) a case covers. Join on `student_id`.
 - **`case_agencies`** — which agency or agencies serviced the student for a case.
+- **`"Users"`** — firm staff. Key columns: `"Email"`, `"Name"` (first name), `"Last Name"`, `"Initials"` (used on timesheets), `"Role"`, `"Designation"` (e.g. Litigator, Case Manager).
 
 ## Important Table Notes
 
