@@ -74,6 +74,22 @@ List foreign keys:
 SELECT tc.table_name, kcu.column_name, ccu.table_name AS foreign_table, ccu.column_name AS foreign_column FROM information_schema.table_constraints tc JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name JOIN information_schema.constraint_column_usage ccu ON tc.constraint_name = ccu.constraint_name WHERE tc.constraint_type = 'FOREIGN KEY' AND tc.table_name = 'TABLE_NAME_HERE'
 ```
 
+## Important Table Notes
+
+### Intake Portal Tables
+The intake portal tables are prefixed with `june_1_`. For example, the intake students table is `june_1_students`, not `students`. When querying intake-related data, always use the `june_1_` prefix.
+
+### Email (`gmail_messages`)
+This table contains all email correspondence from the admin@gerschellaw.com inbox. **NEVER use the `date` column** — it is unreliable. Always use `internal_date` which stores Unix timestamps in milliseconds (e.g. `1718838221000`). To convert:
+```sql
+SELECT subject, to_timestamp(internal_date / 1000) AS sent_at
+FROM gmail_messages
+ORDER BY internal_date DESC
+```
+
+### Calendar / Hearings
+When asked about calendar events, hearings, or scheduling, **never use the `google_calendar` table**. Always use the `hearing` table instead.
+
 ## Guidelines
 
 - **Read-only only.** The API blocks INSERT, UPDATE, DELETE, DROP, ALTER, CREATE, TRUNCATE, and other write operations.
