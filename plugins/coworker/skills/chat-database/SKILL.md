@@ -291,6 +291,62 @@ curl -s https://portal.gerschellaw.com/api/skills/drive/file/FILE_ID \
 
 Returns raw file bytes with appropriate `Content-Type` and `Content-Disposition` headers.
 
+### Upload File to Drive
+
+Upload a file to a specific Google Drive folder. Supports two modes:
+
+**Mode 1: Transfer Gmail attachment to Drive**
+```bash
+curl -s -X POST https://portal.gerschellaw.com/api/skills/drive/upload \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer glk_THE_KEY_FROM_CONTEXT" \
+  -d '{"messageId": "GMAIL_MSG_ID", "attachmentId": "ATTACHMENT_ID", "filename": "report.pdf", "folderId": "DRIVE_FOLDER_ID"}'
+```
+
+**Mode 2: Upload base64 content directly**
+```bash
+curl -s -X POST https://portal.gerschellaw.com/api/skills/drive/upload \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer glk_THE_KEY_FROM_CONTEXT" \
+  -d '{"content": "BASE64_ENCODED_DATA", "filename": "document.pdf", "folderId": "DRIVE_FOLDER_ID", "mimeType": "application/pdf"}'
+```
+
+Response:
+```json
+{"fileId": "new_drive_file_id", "filename": "report.pdf", "folderId": "DRIVE_FOLDER_ID"}
+```
+
+## Gmail Attachments
+
+The `gmail_messages` table has `has_attachments` (boolean) and `attachments` (jsonb) columns. To find emails with attachments:
+
+```sql
+SELECT id, subject, from_address, attachments
+FROM gmail_messages
+WHERE has_attachments = true
+ORDER BY internal_date DESC
+LIMIT 20
+```
+
+Each entry in the `attachments` JSON array has:
+- `filename` — original filename
+- `mimeType` — MIME type
+- `size` — size in bytes
+- `attachmentId` — use this with the upload endpoint to transfer to Drive
+
+Most case-related emails include the 6-digit Case Number in the subject line. Use `subject LIKE '%240012%'` to find emails for a specific case.
+
+### Gmail-to-Drive Workflow
+
+1. Query `gmail_messages` to find the email (by subject, sender, date, etc.)
+2. Read the `attachments` column to find the file you need
+3. Use the upload endpoint with `messageId` (the gmail message `id`) + `attachmentId` + target `folderId`
+
+To find the target folder, either:
+- Get it from `"Case Info Database"."Folder Link"` (extract folder ID from URL)
+- Use `/api/skills/drive/student/:id` to list the case folder structure
+- Use `/api/skills/drive/folder/:id` to browse subfolders
+
 ### Drive Workflow Tips
 
 - Start with `/api/skills/drive/student/:id` to get a student's case files by UCID or OSIS.
@@ -306,3 +362,4 @@ Returns raw file bytes with appropriate `Content-Type` and `Content-Disposition`
 3. Present results clearly, with context and interpretation when helpful.
 4. If a query errors, read the error details and fix.
 5. If the user asks about case files or documents, use the Drive endpoints to browse and retrieve them.
+6. If the user asks to save a Gmail attachment to a case folder, find the email, get the attachment info, and use the upload endpoint.
