@@ -1,0 +1,8 @@
+{
+  "name": "coworker",
+  "description": "Gerschel Law Firm's AI coworker — database queries, case analysis, document drafting, and legal research",
+  "version": "4.0.0",
+  "author": {
+    "name": "Gerschel Law Firm"
+  }
+}

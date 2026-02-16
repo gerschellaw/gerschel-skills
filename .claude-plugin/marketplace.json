@@ -8,9 +8,9 @@
   },
   "plugins": [
     {
-      "name": "chat-with-the-database",
-      "source": "./plugins/chat-with-the-database",
-      "description": "Chat with the Gerschel database"
+      "name": "coworker",
+      "source": "./plugins/coworker",
+      "description": "Gerschel Law Firm's AI coworker — database queries, case analysis, document drafting, and legal research"
     }
   ]
 }
