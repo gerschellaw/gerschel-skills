@@ -209,6 +209,9 @@ case_hub_documents.ucid = "Case Info Database"."UCID"
 
 ## Important Table Notes
 
+### AppSheet Legacy Tables
+Many tables originated from an AppSheet application — this explains the space-separated table/column names (e.g. `"Case Info Database"`, `"Agency ID"`). Newer tables built in the portal use snake_case (e.g. `disclosure_compilation`, `time_entries`). Some columns in AppSheet-originated tables may appear redundant or cryptic — they were used for AppSheet virtual columns or formulas.
+
 ### Intake Portal Tables
 The intake portal tables are prefixed with `june_1_`. For example, the intake students table is `june_1_students`, not `students`. When querying intake-related data, always use the `june_1_` prefix.
 
