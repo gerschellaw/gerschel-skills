@@ -74,6 +74,31 @@ List foreign keys:
 SELECT tc.table_name, kcu.column_name, ccu.table_name AS foreign_table, ccu.column_name AS foreign_column FROM information_schema.table_constraints tc JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name JOIN information_schema.constraint_column_usage ccu ON tc.constraint_name = ccu.constraint_name WHERE tc.constraint_type = 'FOREIGN KEY' AND tc.table_name = 'TABLE_NAME_HERE'
 ```
 
+## Identifier Formats
+
+When a user references a case or student, identify the type from the format:
+
+| Format | Type | Example | Column |
+|--------|------|---------|--------|
+| 6 digits | **Case Number** | `240012` | `"Case Info Database"."Case Number"` |
+| 8 hex chars | **UCID** | `fcfd9b8f` | `"Case Info Database"."UCID"` |
+| 9 digits + dash + 8 hex | **UCID** (long form) | `240400440-3a10c056` | `"Case Info Database"."UCID"` |
+| 9 digits | **OSIS** | `123456789` | `student.osis` |
+
+When a user gives a 6-digit number, always treat it as a Case Number. To get the UCID from a Case Number:
+```sql
+SELECT "UCID" FROM "Case Info Database" WHERE "Case Number" = 240012
+```
+
+The Drive endpoint (`/api/skills/drive/student/:id`) accepts UCID or OSIS — **not** Case Number. If the user provides a Case Number, look up the UCID first, then use that for the Drive API.
+
+## Core Tables
+
+- **`student`** — basic student info (name, DOB, osis, etc.). Linked to cases via `student_id`.
+- **`"Case Info Database"`** — the main case table. Key columns: `"UCID"`, `"Case Number"`, `"Student First Name"`, `"Student Last Name"`, `"Parent Name"`, `"Case Type"`, `"School Year"`, `"Folder Link"`, `"IHO"`, `"Hearing Staff"`, `student_id`.
+- **`case_school_year`** — which school year(s) a case covers. Join on `student_id`.
+- **`case_agencies`** — which agency or agencies serviced the student for a case.
+
 ## Important Table Notes
 
 ### Intake Portal Tables
