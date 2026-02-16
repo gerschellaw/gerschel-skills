@@ -100,6 +100,113 @@ The Drive endpoint (`/api/skills/drive/student/:id`) accepts UCID or OSIS — **
 - **`case_agencies`** — which agency or agencies serviced the student for a case.
 - **`"Users"`** — firm staff. Key columns: `"Email"`, `"Name"` (first name), `"Last Name"`, `"Initials"` (used on timesheets), `"Role"`, `"Designation"` (e.g. Litigator, Case Manager).
 
+## Table Relationships
+
+### Case → Student
+```sql
+"Case Info Database".student_id = student.student_id
+```
+
+### Case → School Years
+```sql
+case_school_year.ucid = "Case Info Database"."UCID"
+```
+
+### Case → Agencies
+```sql
+case_agencies.ucid = "Case Info Database"."UCID"
+case_agencies.agency_id = "Agencies Database"."Agency ID"
+```
+
+### Case → Services
+```sql
+"Services Database"."UCID" = "Case Info Database"."UCID"
+```
+
+### Case → Hearings
+```sql
+hearing.ucid = "Case Info Database"."UCID"
+"Hearing Prep"."Calendar Event ID" = hearing.event_id
+```
+
+### Case → IHO
+```sql
+"Case Info Database"."IHO" = "IHO Database"."IHO"
+```
+
+### Case → Parents
+```sql
+-- Go through student to get parent
+student.parent_id = "Parent Information Database"."Parent ID"
+```
+
+### Case → Disclosure
+```sql
+disclosure_compilation.ucid = "Case Info Database"."UCID"
+disclosure_exhibit.compilation_id = disclosure_compilation.id
+disclosure_exhibit_file.exhibit_id = disclosure_exhibit.id
+disclosure_witness.compilation_id = disclosure_compilation.id
+```
+
+### Case → Case Notes
+```sql
+"Case Notes Database"."Unique Case ID" = "Case Info Database"."UCID"
+```
+
+### Case → Time Entries
+```sql
+-- time_entries uses case_number as text, employee is the user's email address
+time_entries.case_number = "Case Info Database"."Case Number"::text
+time_entries.employee = "Users"."Email"
+```
+
+### Case → Witnesses
+```sql
+"Witness Database"."RelatedCase" = "Case Info Database"."UCID"
+```
+
+### Case → SRO Appeals
+```sql
+"SRO Database"."Case UCID" = "Case Info Database"."UCID"
+```
+
+### Case → Google Drive Folder
+Each row in `"Case Info Database"` has a `"Folder Link"` column containing the Google Drive URL for the case folder. Extract the folder ID from the URL pattern: `https://drive.google.com/drive/folders/FOLDER_ID`.
+
+### Billing Chain
+```sql
+-- Charge → Invoice (via line items)
+charge.charge_id = invoice_line_item.charge_id
+invoice_line_item.invoice_id = invoice.invoice_id
+
+-- Payment → Invoice (via allocation)
+payment.payment_id = payment_allocation.payment_id
+payment_allocation.invoice_id = invoice.invoice_id
+
+-- Payor connects to either agency or parent
+payor.agency_id = "Agencies Database"."Agency ID"  -- when payor_type = 'agency'
+payor.parent_id = "Parent Information Database"."Parent ID"  -- when payor_type = 'Parent'
+
+-- Rates by school year
+payor_rate.payor_id = payor.payor_id  -- filtered by school_year
+```
+
+### SRO Decisions (legal research)
+```sql
+sro_issues.sro_decision_id = sro_decisions.id
+legal_document_issues.legal_document_id = legal_documents.id
+```
+
+### Case Hub Documents
+```sql
+case_hub_documents.ucid = "Case Info Database"."UCID"
+```
+
+### Schools → CSE
+```sql
+"Schools Database"."CSE" = "CSE Database"."CSE Name"
+```
+
 ## Important Table Notes
 
 ### Intake Portal Tables
